@@ -1,0 +1,30 @@
+<template>
+  <div>
+    <button @click="handleClickFetchButton">取得</button>
+    <div>{{ userName }}さんようこそ</div>
+    <div>残高：{{}}</div>
+    <h2>ユーザー一覧</h2>
+  </div>
+</template>
+<script src="https://www.gstatic.com/firebasejs/6.5.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.5.0/firebase-firestore.js"></script>	
+<script>
+
+import firebase from 'firebase/app';
+export default {
+  data() {
+    return {
+      name: '',
+      comment: '',
+    };
+  },
+  methods: {
+    handleClickFetchButton() {
+      const db = firebase.firestore();
+      db.collection('comments').doc('04ttF9rboAzPIGaiKtre').get().then((doc) => {
+         console.log('Document data:', doc.data());
+      })
+    },
+  },
+};
+</script>
