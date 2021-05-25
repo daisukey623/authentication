@@ -1,0 +1,50 @@
+<template>
+  <div>
+    <div>{{userName}}さんようこそ</div>
+    <div>残高：{{}}</div>
+    <h2>ユーザー一覧</h2>
+
+    </div> -->
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      name: '',
+      comment: '',
+      posts: [],
+      userName:'',
+    };
+  },
+  created() {
+    axios.get('/comments').then((response) => {
+      this.posts = response.data.documents;
+    });
+  },
+  getName() {
+    axios.get('/comments').then((response) => {
+      this.userName = response.data.documents.name;
+    })
+  },
+  methods: {
+    createComment() {
+      axios.post('/comments', {
+        fields: {
+          name: {
+            stringValue: this.name,
+          },
+          comment: {
+            stringValue: this.comment,
+          },
+        },
+      });
+      this.name = '';
+      this.comment = '';
+    },
+  },
+};
+</script>
