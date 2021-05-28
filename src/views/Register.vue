@@ -51,7 +51,7 @@ export default {
         .set(
           {
             name: this.userName,
-            conin: 1000,
+            coin: 1000,
           },
           { marge: true },
           console.log(this.userName)
