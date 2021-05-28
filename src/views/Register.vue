@@ -17,9 +17,8 @@
 </template>
 
 <script>
-// import firebase from 'firebase'
 import { auth } from '../main';
-import { db } from '../main'; // ここを追加
+import { db } from '../main'; 
 
 export default {
   data() {

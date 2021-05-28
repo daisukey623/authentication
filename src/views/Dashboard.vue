@@ -8,8 +8,8 @@
 </template>
 
 <script>
-import { db } from "../main.js" //
-import { auth } from "../main.js" //
+import { db } from "../main.js" 
+import { auth } from "../main.js" 
 export default {
   data() {
     return {
