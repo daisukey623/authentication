@@ -33,7 +33,6 @@ export default {
       auth
         .createUserWithEmailAndPassword(this.email, this.password)
         .then((result) => {
-          console.log('1回目のthen');
           result.user
           this.createUser()
           alert('アカウントを作成しました');
@@ -44,7 +43,6 @@ export default {
         });
     },
     createUser() {
-      console.log('2回目のthen');
       db.collection('users')
         .doc(auth.currentUser.uid)
         .set(
@@ -53,9 +51,7 @@ export default {
             coin: 1000,
           },
           { marge: true },
-          console.log(this.userName)
         );
-      console.log(auth.currentUser.uid);
     },
   },
 };
