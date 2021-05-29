@@ -17,9 +17,8 @@
 </template>
 
 <script>
-// import firebase from 'firebase'
 import { auth } from '../main';
-import { db } from '../main'; // ここを追加
+import { db } from '../main'; 
 
 export default {
   data() {
@@ -34,7 +33,6 @@ export default {
       auth
         .createUserWithEmailAndPassword(this.email, this.password)
         .then((result) => {
-          console.log('1回目のthen');
           result.user
           this.createUser()
           alert('アカウントを作成しました');
@@ -45,7 +43,6 @@ export default {
         });
     },
     createUser() {
-      console.log('2回目のthen');
       db.collection('users')
         .doc(auth.currentUser.uid)
         .set(
@@ -54,9 +51,7 @@ export default {
             coin: 1000,
           },
           { marge: true },
-          console.log(this.userName)
         );
-      console.log(auth.currentUser.uid);
     },
   },
 };

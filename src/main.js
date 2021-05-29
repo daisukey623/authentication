@@ -3,6 +3,7 @@ import App from './App.vue';
 import router from './router';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import store from '@/store/store.js'
 
 
 
@@ -22,6 +23,7 @@ import 'firebase/firestore';
 
 new Vue({
   router,
+  store,
   render: h => h(App)
 }).$mount('#app');
 

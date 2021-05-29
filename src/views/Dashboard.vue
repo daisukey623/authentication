@@ -8,21 +8,22 @@
 </template>
 
 <script>
-import { db } from "../main.js" //
-import { auth } from "../main.js" //
+import firebase from 'firebase/app';
 export default {
-  data() {
-    return {
-      userName:'',
-      coin: '',
-    };
-  }, 
-  created: async function() {
-    const doc = await db.collection('users')
-      .doc(auth.currentUser.uid)
-      .get()
-      this.userName = doc.data().name
-      this.coin = doc.data().coin
+  created() {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.$store.dispatch('getUser');
+      }
+    });
+  },
+  computed:{
+    userName(){ 
+      return this.$store.getters.userName
     },
+    coin(){
+      return this.$store.getters.coin
+    }
+  }
 };
 </script>
