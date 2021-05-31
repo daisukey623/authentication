@@ -9,18 +9,10 @@
 </template>
 
 <script>
-import firebase from 'firebase/app';
 import { auth } from '../main';
 export default {
   created() {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (!user) {
-        this.$router.push('/login');
-        window.alert('ログアウトしました');
-        } else {
-        this.$store.dispatch('getUser');
-      }
-    });
+    this.$store.dispatch('getUser');
   },
   computed: {
     userName() {
@@ -32,7 +24,7 @@ export default {
   },
   methods: {
     logOut: async function() {
-     await auth.signOut();
+      await auth.signOut();
     },
   },
 };
