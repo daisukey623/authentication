@@ -8,6 +8,7 @@ export default new Vuex.Store({
   state: {
     userName: '',
     coin: '',
+    userLists: [],
   },
   getters: {
     userName: (state) => {
@@ -16,11 +17,18 @@ export default new Vuex.Store({
     coin: (state) => {
       return state.coin;
     },
+    userLists: (state) => {
+      console.log(state.userLists);
+      return state.userLists;
+    },
   },
   mutations: {
     getUser(state, doc) {
       state.userName = doc.data().name;
       state.coin = doc.data().coin;
+    },
+    getUserLists(state, doc) {
+      state.userLists.push(doc.data());
     },
   },
   actions: {
@@ -33,6 +41,15 @@ export default new Vuex.Store({
         commit('getUser', doc);
       };
       AsyncGetUser();
+    },
+    getUserLists({ commit }) {
+      const AsyncGetUserLists = async () => {
+        const querySnapshot = await db.collection('users').get();
+        querySnapshot.forEach((doc) => {
+          commit('getUserLists', doc);
+        });
+      };
+      AsyncGetUserLists();
     },
   },
 });

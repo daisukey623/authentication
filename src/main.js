@@ -4,8 +4,10 @@ import router from './router';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import store from '@/store/store.js'
+import Buefy from 'buefy'
+import 'buefy/dist/buefy.css'
 
-
+Vue.use(Buefy)
 
 
   // Your web app's Firebase configuration
