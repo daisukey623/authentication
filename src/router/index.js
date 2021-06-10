@@ -7,11 +7,12 @@ import firebase from 'firebase/app';
 
 Vue.use(VueRouter);
 
-const routes = [
-  {
+const routes = [{
     path: '/',
     component: Dashboard,
-    meta: { requiresAuth: true },
+    meta: {
+      authFlag: true
+    },
   },
   {
     path: '/login',
@@ -29,19 +30,20 @@ const router = new VueRouter({
   routes,
 });
 
+var authFlag = true;
 router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-  if (requiresAuth) {
-  firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        next();
-      } else {
-        next('/login');
-      }
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (authFlag) {
+          authFlag = false;
+          if (user) {
+            next();
+          } else {
+            next('/login');
+          }
+        } else {
+          next();
+        }
+      })
     });
-  } else {
-    next();
-  }
-});
 
-export default router;
+      export default router;
