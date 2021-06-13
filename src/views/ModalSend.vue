@@ -2,8 +2,7 @@
   <div>
     <div id="overlay">
       <div id="content">
-        <p>あなたの残高:{{ valSend }}</p>
-        <p>{{ sendedCoin }}</p>
+        <p>あなたの残高:{{ LoginUser.coin }}</p>
         <form>
           <input type="number" value="sendCoin" v-model="sendedCoin" />
           <button
@@ -25,13 +24,16 @@
 <script>
 export default {
   name: 'ModalSend',
-  props: ['valSend'],
+  props: ['sentIndex'],
   data() {
     return {
       sendedCoin: '',
     };
   },
   computed: {
+    LoginUser() {
+      return this.$store.getters.LoginUser;
+    },
     userLists() {
       return this.$store.getters.userLists;
     },
@@ -39,7 +41,7 @@ export default {
 
   methods: {
     updateCoin() {
-      this.$store.dispatch('updateUser', this.sendedCoin);
+      this.$store.dispatch('updateUsers', { sendedCoin: this.sendedCoin });
       this.sendedCoin = '';
     },
   },

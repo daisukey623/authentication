@@ -6,49 +6,41 @@ import { db } from '../main.js';
 import { auth } from '../main.js';
 export default new Vuex.Store({
   state: {
-    userName: '',
-    coin: '',
-    id: '',
-    userLists: [],
-    OtherUser: {
+    LoginUser: {
       id: '',
+      name: '',
       coin: '',
     },
+    userLists: [],
+    userListsID: [],
+    ReceiveUserListsIndex: '',
   },
   getters: {
-    userName: (state) => {
-      return state.userName;
-    },
-    coin: (state) => {
-      return state.coin;
-    },
-    id: (state) => {
-      return state.id;
+    LoginUser: (state) => {
+      return state.LoginUser;
     },
     userLists: (state) => {
       return state.userLists;
     },
-    OtherUser: (state) => {
-      return state.OtherUser;
-    },
   },
   mutations: {
     getUser(state, doc) {
-      state.userName = doc.data().name;
-      state.coin = doc.data().coin;
-      state.id = doc.data().id;
+      state.LoginUser = doc.data();
     },
     getUserLists(state, doc) {
       state.userLists.push(doc.data());
-      state.id = doc.id;
+      state.userListsID.push(doc.id);
     },
-    updateUser(state, e) {
-      state.coin - Number(e);
-      state.OtherUser.coin + Number(e);
+    updateUsers(state, Coin) {
+      state.userLists[state.ReceiveUserListsIndex].coin += Number(Coin);
     },
-    updateOtherUser(state, { idList, docList, index }) {
-      state.OtherUser.id = idList[index];
-      state.OtherUser.coin = docList[index].coin;
+    ResetUserLists(state) {
+      state.LoginUser = '';
+      state.userLists = [];
+      state.userListsID = [];
+    },
+    getReceiveUserIndex(state, index) {
+      state.ReceiveUserListsIndex = index;
     },
   },
   actions: {
@@ -66,7 +58,6 @@ export default new Vuex.Store({
     getUserLists({ commit }) {
       const AsyncGetUserLists = async () => {
         await db.collection('users').onSnapshot((querySnapshot) => {
-          // let users = [];
           querySnapshot.forEach((doc) => {
             commit('getUserLists', doc);
           });
@@ -74,42 +65,65 @@ export default new Vuex.Store({
       };
       AsyncGetUserLists();
     },
-    updateUser({ commit }, e) {
+    updateUsers({ commit }, sendedCoin) {
       const AsyncUpdateUser = async () => {
-        await db
+        const LoginUser = await db
           .collection('users')
-          .doc(auth.currentUser.uid)
-          .update({
-            coin: this.state.coin - Number(e),
+          .doc(auth.currentUser.uid);
+        db.runTransaction((transaction) => {
+          return transaction.get(LoginUser).then((Doc) => {
+            if (!Doc.exists) {
+              console.log('noexxist');
+            }
+            const upLoginUser = Doc.data().coin;
+            if (upLoginUser > 0) {
+              transaction.update(LoginUser, {
+                coin: this.state.LoginUser.coin - Number(sendedCoin.sendedCoin),
+              });
+              return upLoginUser;
+            } else {
+              return Promise.reject('残高が足りません.');
+            }
           });
-        await db
+        })
+          .then(() => {
+            console.log('Population increased to ');
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+        const userLists = await db
           .collection('users')
-          .doc(this.state.OtherUser.id)
-          .update({
-            coin: this.state.OtherUser.coin + Number(e),
-          });
+          .doc(this.state.userListsID[this.state.ReceiveUserListsIndex]);
 
-        const querySnapshot = await db.collection('users').get();
-        await querySnapshot.forEach((doc) => {
-          commit('getUserLists', doc);
+        db.runTransaction((transaction) => {
+          return transaction.get(userLists).then((Doc) => {
+            if (!Doc.exists) {
+              console.log('noexxist');
+            }
+            const upUserLists = Doc.data().coin;
+            if (upUserLists > 0) {
+              transaction.update(userLists, {
+                coin:
+                  Number(
+                    this.state.userLists[this.state.ReceiveUserListsIndex].coin
+                  ) + Number(sendedCoin.sendedCoin),
+              });
+              return upUserLists;
+            } else {
+              return Promise.reject('残高が足りません.');
+            }
+          });
         });
-        await commit('updateUser', e);
+        await commit('updateUsers', sendedCoin.sendedCoin);
       };
       AsyncUpdateUser();
     },
-
-    updateOtherUser({ commit }, index) {
-      const AsyncUpdateOtherUser = async () => {
-        const idList = [];
-        const docList = [];
-        const querySnapshot = await db.collection('users').get();
-        await querySnapshot.forEach((doc) => {
-          idList.push(doc.id);
-          docList.push(doc.data());
-        });
-        await commit('updateOtherUser', { idList, docList, index });
-      };
-      AsyncUpdateOtherUser();
+    getReceiveUserIndex({ commit }, index) {
+      commit('getReceiveUserIndex', index);
+    },
+    ResetUserLists({ commit }) {
+      commit('ResetUserLists');
     },
   },
 });
