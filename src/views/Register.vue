@@ -18,7 +18,7 @@
 
 <script>
 import { auth } from '../main';
-import { db } from '../main'; 
+import { db } from '../main';
 
 export default {
   data() {
@@ -33,8 +33,8 @@ export default {
       auth
         .createUserWithEmailAndPassword(this.email, this.password)
         .then((result) => {
-          result.user
-          this.createUser()
+          result.user;
+          this.createUser();
           alert('アカウントを作成しました');
           this.$router.push('/');
         })
@@ -50,7 +50,7 @@ export default {
             name: this.userName,
             coin: 1000,
           },
-          { marge: true },
+          { marge: true }
         );
     },
   },

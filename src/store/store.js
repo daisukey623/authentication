@@ -70,13 +70,16 @@ export default new Vuex.Store({
         const LoginUser = await db
           .collection('users')
           .doc(auth.currentUser.uid);
+        const userLists = await db
+          .collection('users')
+          .doc(this.state.userListsID[this.state.ReceiveUserListsIndex]);
         db.runTransaction((transaction) => {
           return transaction.get(LoginUser).then((Doc) => {
             if (!Doc.exists) {
-              console.log('noexxist');
+              console.log('noExist');
             }
             const upLoginUser = Doc.data().coin;
-            if (upLoginUser > 0) {
+            if (upLoginUser > 0 || this.state.LoginUser.coin - Number(sendedCoin.sendedCoin) > 0 ){
               transaction.update(LoginUser, {
                 coin: this.state.LoginUser.coin - Number(sendedCoin.sendedCoin),
               });
@@ -88,33 +91,31 @@ export default new Vuex.Store({
         })
           .then(() => {
             console.log('Population increased to ');
+            db.runTransaction((transaction) => {
+              return transaction.get(userLists).then((Doc) => {
+                if (!Doc.exists) {
+                  console.log('noexxist');
+                }
+                const upUserLists = Doc.data().coin;
+                if (upUserLists > 0) {
+                  transaction.update(userLists, {
+                    coin:
+                      Number(
+                        this.state.userLists[this.state.ReceiveUserListsIndex]
+                          .coin
+                      ) + Number(sendedCoin.sendedCoin),
+                  });
+                  return upUserLists;
+                } else {
+                  return Promise.reject('残高が足りません.');
+                }
+              });
+            });
           })
           .catch((err) => {
             console.error(err);
           });
-        const userLists = await db
-          .collection('users')
-          .doc(this.state.userListsID[this.state.ReceiveUserListsIndex]);
 
-        db.runTransaction((transaction) => {
-          return transaction.get(userLists).then((Doc) => {
-            if (!Doc.exists) {
-              console.log('noexxist');
-            }
-            const upUserLists = Doc.data().coin;
-            if (upUserLists > 0) {
-              transaction.update(userLists, {
-                coin:
-                  Number(
-                    this.state.userLists[this.state.ReceiveUserListsIndex].coin
-                  ) + Number(sendedCoin.sendedCoin),
-              });
-              return upUserLists;
-            } else {
-              return Promise.reject('残高が足りません.');
-            }
-          });
-        });
         await commit('updateUsers', sendedCoin.sendedCoin);
       };
       AsyncUpdateUser();
