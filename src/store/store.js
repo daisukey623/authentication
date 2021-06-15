@@ -87,6 +87,7 @@ export default new Vuex.Store({
             } else {
               return Promise.reject('残高が足りません.');
             }
+            
           });
         })
           .then(() => {
