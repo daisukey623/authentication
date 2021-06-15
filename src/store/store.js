@@ -6,125 +6,51 @@ import { db } from '../main.js';
 import { auth } from '../main.js';
 export default new Vuex.Store({
   state: {
-    LoginUser: {
-      id: '',
-      name: '',
-      coin: '',
-    },
-    userLists: [],
-    userListsID: [],
-    ReceiveUserListsIndex: '',
+    userName: '',
+    coin: '',
+    userLists: []
   },
   getters: {
-    LoginUser: (state) => {
-      return state.LoginUser;
+    userName: (state) => {
+      return state.userName;
+    },
+    coin: (state) => {
+      return state.coin;
     },
     userLists: (state) => {
+      console.log(state.userLists);
       return state.userLists;
     },
   },
   mutations: {
     getUser(state, doc) {
-      state.LoginUser = doc.data();
+      state.userName = doc.data().name;
+      state.coin = doc.data().coin;
     },
     getUserLists(state, doc) {
       state.userLists.push(doc.data());
-      state.userListsID.push(doc.id);
-    },
-    updateUsers(state, Coin) {
-      state.userLists[state.ReceiveUserListsIndex].coin += Number(Coin);
-    },
-    ResetUserLists(state) {
-      state.LoginUser = '';
-      state.userLists = [];
-      state.userListsID = [];
-    },
-    getReceiveUserIndex(state, index) {
-      state.ReceiveUserListsIndex = index;
     },
   },
   actions: {
     getUser({ commit }) {
       const AsyncGetUser = async () => {
-        await db
+        const doc = await db
           .collection('users')
           .doc(auth.currentUser.uid)
-          .onSnapshot((doc) => {
-            commit('getUser', doc);
-          });
+          .get();
+        commit('getUser', doc);
       };
       AsyncGetUser();
     },
     getUserLists({ commit }) {
       const AsyncGetUserLists = async () => {
-        await db.collection('users').onSnapshot((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            commit('getUserLists', doc);
-          });
+        const querySnapshot = await db.collection('users').get();
+        querySnapshot.forEach((doc) => {
+          commit('getUserLists', doc);
         });
       };
       AsyncGetUserLists();
     },
-    updateUsers({ commit }, sendedCoin) {
-      const AsyncUpdateUser = async () => {
-        const LoginUser = await db
-          .collection('users')
-          .doc(auth.currentUser.uid);
-        const userLists = await db
-          .collection('users')
-          .doc(this.state.userListsID[this.state.ReceiveUserListsIndex]);
-        db.runTransaction((transaction) => {
-          return transaction.get(LoginUser).then((Doc) => {
-            if (!Doc.exists) {
-              console.log('noExist');
-            }
-            const upLoginUser = Doc.data().coin;
-            if (upLoginUser > 0 || this.state.LoginUser.coin - Number(sendedCoin.sendedCoin) > 0 ){
-              transaction.update(LoginUser, {
-                coin: this.state.LoginUser.coin - Number(sendedCoin.sendedCoin),
-              });
-              return upLoginUser;
-            } else {
-              return Promise.reject('残高が足りません.');
-            }
-          });
-        })
-          .then(() => {
-            console.log('Population increased to ');
-            db.runTransaction((transaction) => {
-              return transaction.get(userLists).then((Doc) => {
-                if (!Doc.exists) {
-                  console.log('noexxist');
-                }
-                const upUserLists = Doc.data().coin;
-                if (upUserLists > 0) {
-                  transaction.update(userLists, {
-                    coin:
-                      Number(
-                        this.state.userLists[this.state.ReceiveUserListsIndex]
-                          .coin
-                      ) + Number(sendedCoin.sendedCoin),
-                  });
-                  return upUserLists;
-                } else {
-                  return Promise.reject('残高が足りません.');
-                }
-              });
-            });
-          })
-          .catch((err) => {
-            console.error(err);
-          });
 
-        await commit('updateUsers', sendedCoin.sendedCoin);
-      };
-      AsyncUpdateUser();
-    },
-    getReceiveUserIndex({ commit }, index) {
-      commit('getReceiveUserIndex', index);
-    },
-    ResetUserLists({ commit }) {
-      commit('ResetUserLists');
-    },
   },
 });

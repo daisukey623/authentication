@@ -9,6 +9,8 @@ import 'buefy/dist/buefy.css'
 
 Vue.use(Buefy)
 
+
+  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyALEeG-uCX4SsTwYA51b2yka3Lb7Iv2w4Q",
     authDomain: "vuejs-http-de60c.firebaseapp.com",
@@ -17,6 +19,7 @@ Vue.use(Buefy)
     messagingSenderId: "897481049619",
     appId: "1:897481049619:web:c9e774a648e193e87c61e6"
   };
+  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
 
 
